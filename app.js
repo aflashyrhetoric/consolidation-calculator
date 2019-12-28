@@ -26,9 +26,9 @@ function main() {
 
   // Set initial 'best'
   let best = {
-    total: calculateTotalMultiple(loans, [], loanData.consolidatedInterestRate),
     loans,
     omittedLoans: [],
+    total: calculateTotalMultiple(loans, [], loanData.consolidatedInterestRate),
   }
 
   console.log(`
@@ -42,11 +42,15 @@ function main() {
 
   // Iteratively check every single ORDERING
   for (let val of loans) {
-    best = findBestSet(loans, [], best)
+    const tempLoans = [...loans]
+    best = findBestSet(tempLoans, [], best)
     loans.push(loans.shift())
   }
 
+  best.loans.push(best.omittedLoans.pop())
+
   console.log(`
+    Total possibilities: ${loans.length * (loans.length - 1)}
     To get the lowest total, consolidate these loans: ${best.loans.map(
       (l) => `${l.bal}`,
     )}
@@ -61,25 +65,23 @@ function findBestSet(
   best,
   consolidatedInterestRate = calculateConsolidatedInterestRate(loans),
 ) {
-  if (loans.length == 0) {
+  if (loans.length == 1) {
+    console.log("Exhausted current order, resuming with next...\n\n\n")
     return best
   }
-
-  loans = [...loans]
-
   const total = calculateTotalMultiple(loans, omitted, consolidatedInterestRate)
-
   if (total < best.total) {
-    best.loans = loans
-    best.omittedLoans = omitted
-    best.total = total
-    return findBestSet(loans, omitted, best)
+    best = {
+      loans,
+      omittedLoans: omitted,
+      total: total,
+    }
   }
 
-  logIters(loans, omitted, total)
+  logIters(loans, omitted, total, total < best.total)
 
   omitted.push(loans.pop())
-  return findBestSet(loans, omitted, best)
+  return findBestSet([...loans], [...omitted], { ...best })
 }
 
 main()

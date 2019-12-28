@@ -32,12 +32,11 @@ export function calculateTotalMultiple(
   return consolidatedTotal + unconsolidatedTotal
 }
 
-
 export function calculateConsolidatedInterestRate(loans) {
   const totalBal = total(loans, 'bal')
   // console.log(totalBal)
   const summationOfIndividualInterest = loans.reduce((acc, val) => {
-    return acc += val.interest
+    return (acc += val.interest)
   }, 0)
   let rate = summationOfIndividualInterest / totalBal
   rate = rate * 100
@@ -65,9 +64,12 @@ export function log(loans) {
   console.log(loans)
 }
 
-export function logIters(loans, omitted, total) {
+export function logIters(loans, omitted, total, best = false) {
   console.log('if you consolidate these:', ...loans.map((o) => o.bal))
   console.log('and leave these:', ...omitted.map((o) => o.bal))
-  console.log('the total would be', total, '\n\n')
+  console.log('the total would be', total, '\n')
   // console.log('consolidated interest rate is:', consolidatedInterestRate)
+  if (best) {
+    console.log('\t\t\t\t^^^NEW BEST FOUND')
+  }
 }
