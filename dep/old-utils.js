@@ -32,8 +32,20 @@ export function calculateTotalMultiple(
   return consolidatedTotal + unconsolidatedTotal
 }
 
+export function averageBal(loans) {
+  return total(loans, 'bal') / arr.length
+}
 
 export function calculateConsolidatedInterestRate(loans) {
+  // const totalBal = total(loans, 'bal')
+  // console.log(totalBal)
+  // const totalInterest = total(loans, 'interest')
+  // console.log(totalInterest)
+  // let rate = totalBal / totalInterest
+  // rate = roundUpToNearestEigth(rate)
+  // return rate
+
+
   const totalBal = total(loans, 'bal')
   // console.log(totalBal)
   const summationOfIndividualInterest = loans.reduce((acc, val) => {
@@ -59,15 +71,20 @@ export function averageInterest(loans) {
   return total(loans, 'bal') / loans.length
 }
 
-export function log(loans) {
-  console.log('there are', loans.length, 'loans')
-  console.log(averageInterestRate(loans))
-  console.log(loans)
+export function calculateTotalInterest(loans) {
+  return loans.reduce((acc, val) => {
+    acc += val.bal * (val.interestRate / 100)
+    return acc
+  }, 0)
 }
 
-export function logIters(loans, omitted, total) {
-  console.log('if you consolidate these:', ...loans.map((o) => o.bal))
-  console.log('and leave these:', ...omitted.map((o) => o.bal))
-  console.log('the total would be', total, '\n\n')
-  // console.log('consolidated interest rate is:', consolidatedInterestRate)
+export function averageInterestRate(loans) {
+  return total(loans, 'interestRate') / loans.length
+}
+
+export function log(loans) {
+  console.log('there are', loans.length, 'loans')
+  console.log(averageBal(loans))
+  console.log(averageInterestRate(loans))
+  console.log(loans)
 }

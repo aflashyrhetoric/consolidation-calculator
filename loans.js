@@ -1,4 +1,4 @@
-export default [
+export const loans = [
   {
     bal: 23956,
     interestRate: 5.84,

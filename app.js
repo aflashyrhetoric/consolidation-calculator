@@ -1,45 +1,54 @@
-import loans from './loans.js'
+import { loans as rawLoanData } from './loans.js'
 import {
-  averageBal,
-  total,
   calculateTotalMultiple,
-  averageInterestRate,
-  averageInterest,
   calculateInterest,
-  calculateTotalInterest,
-  log,
   calculateConsolidatedInterestRate,
+  logIters,
 } from './utils.js'
 
 function setComputedValues(loans) {
-  const AIR = averageInterestRate(loans)
-  const AI = averageInterest(loans)
+  // const AIR = averageInterestRate(loans)
+  // const AI = averageInterest(loans)
 
   loans = loans.map((loan) => {
     loan.interest = calculateInterest(loan)
-    loan.deviationInterestRate = loan.interestRate - AIR
-    loan.deviationInterest = loan.interest - AI
+    // loan.deviationInterestRate = loan.interestRate - AIR
+    // loan.deviationInterest = loan.interest - AI
     return loan
   })
   return loans
 }
 
 function main() {
-  const l = setComputedValues(loans)
+  const loans = setComputedValues(rawLoanData)
   let loanData = {}
-  loanData.averageInterestRate = averageInterestRate(loans)
-  loanData.averageInterest = averageInterest(loans)
   loanData.consolidatedInterestRate = calculateConsolidatedInterestRate(loans)
 
+  // Set initial 'best'
   let best = {
-    total: calculateTotalMultiple(loans),
+    total: calculateTotalMultiple(loans, [], loanData.consolidatedInterestRate),
     loans,
     omittedLoans: [],
   }
 
+  console.log(`
+    If you consolidate all, your total would be: ${best.total}
+    If you don't consolidate anything, your total would be: ${calculateTotalMultiple(
+      [],
+      loans,
+      loanData.consolidatedInterestRate,
+    )}
+  `)
+
   best = findBestSet(loans, [], best)
 
-  console.log(best)
+  console.log(`
+    To get the lowest total, consolidate these loans: ${best.loans.map(
+      (l) => `${l.bal}`,
+    )}
+    And leave these: ${best.omittedLoans.map((v) => v.bal)}
+    For a total of: ${best.total}
+  `)
 }
 
 function findBestSet(
@@ -49,20 +58,22 @@ function findBestSet(
   consolidatedInterestRate = calculateConsolidatedInterestRate(loans),
 ) {
   const total = calculateTotalMultiple(loans, omitted, consolidatedInterestRate)
-  console.log('consolidated set:', ...loans.map((o) => o.bal))
-  console.log('omitted set:', ...omitted.map((o) => o.bal))
-  console.log('total is', total, '\n\n\n')
-  if (total < calculateTotalMultiple(best.loans)) {
-    best.total = total
-    best.omitted = omitted
+
+  if (total < best.total) {
     best.loans = loans
-  }
-  if (loans.length == 1) {
-    return best
-  } else {
-    omitted.push(loans.pop())
+    best.omittedLoans = omitted
+    best.total = total
     return findBestSet(loans, omitted, best)
   }
+
+  logIters(loans, omitted, total)
+
+  if (loans.length == 0) {
+    return best
+  }
+
+  omitted.push(loans.pop())
+  return findBestSet(loans, omitted, best)
 }
 
 main()
