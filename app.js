@@ -20,7 +20,7 @@ function setComputedValues(loans) {
 }
 
 function main() {
-  const loans = setComputedValues(rawLoanData)
+  let loans = setComputedValues(rawLoanData)
   let loanData = {}
   loanData.consolidatedInterestRate = calculateConsolidatedInterestRate(loans)
 
@@ -40,7 +40,11 @@ function main() {
     )}
   `)
 
-  best = findBestSet(loans, [], best)
+  // Iteratively check every single ORDERING
+  for (let val of loans) {
+    best = findBestSet(loans, [], best)
+    loans.push(loans.shift())
+  }
 
   console.log(`
     To get the lowest total, consolidate these loans: ${best.loans.map(
@@ -57,6 +61,12 @@ function findBestSet(
   best,
   consolidatedInterestRate = calculateConsolidatedInterestRate(loans),
 ) {
+  if (loans.length == 0) {
+    return best
+  }
+
+  loans = [...loans]
+
   const total = calculateTotalMultiple(loans, omitted, consolidatedInterestRate)
 
   if (total < best.total) {
@@ -67,10 +77,6 @@ function findBestSet(
   }
 
   logIters(loans, omitted, total)
-
-  if (loans.length == 0) {
-    return best
-  }
 
   omitted.push(loans.pop())
   return findBestSet(loans, omitted, best)
